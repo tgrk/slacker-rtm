@@ -1,0 +1,12 @@
+{application, 'slacker-rtm',
+   [{description, "Erlang Real Time Messaging API client for Slack"},
+    {vsn, "0.1"},
+    {registered, []},
+    {modules, []},
+    {applications, [stdlib,
+                    kernel
+                   ]},
+    {mod, {sr_app, []}},
+    {env, []}
+   ]
+}.
