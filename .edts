@@ -1,0 +1,5 @@
+:name "Slacker-RTM"
+:node-sname "sr"
+:lib-dirs '("deps" "test")
+:app-include-dirs '("include" "")
+:project-include-dirs '("deps/*/include" "include")
