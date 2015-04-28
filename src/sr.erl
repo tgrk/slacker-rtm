@@ -15,9 +15,6 @@
 
 -define(BASE_URL, "https://slack.com/").
 
-%% Types
--type scope() :: atom() | identify | client | read | post | admin.
-
 %%%============================================================================
 %%% API
 %%%============================================================================
@@ -29,14 +26,6 @@ connect(Token) ->
         true  ->
             %%NOTE: websocket_client is not working in supervisor
             sr_client:start_link(maps:get(<<"url">>, Response));
-            %% case sr_sup:start_client(maps:get(<<"url">>, Response)) of
-            %%     Pid when is_pid(Pid) ->
-            %%         error_logger:info_msg("pid=~p", [Pid]),
-            %%         {ok, Pid};
-            %%     Error ->
-            %%         error_logger:error_msg("error=~p", [Error]),
-            %%         Error
-            %% end;
         false ->
             {error, {unable_to_connect, Response}}
     end.
@@ -72,7 +61,6 @@ ensure_started(App) ->
 
 call_api(UrlType, Args) when is_list(Args) ->
     Url = get_url(UrlType) ++ "?" ++ http_flatten_args(Args),
-    error_logger:info_msg("slacker-rtm: get url=~p~n", [Url]),
     case http_request(Url, get) of
         {ok, Headers, Response} ->
             {ok, Headers, parse_response(Headers, Response)};

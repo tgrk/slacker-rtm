@@ -10,13 +10,16 @@
 -include("sr.hrl").
 
 %% API
--export([start_link/1]).
+-export([ start_link/1
+        , send/1,
+          send/2
+        ]).
 
 %% websocket_client_handler callbacks
--export([init/2,
-         websocket_handle/3,
-         websocket_info/3,
-         websocket_terminate/3
+-export([ init/2
+         , websocket_handle/3
+         , websocket_info/3
+         , websocket_terminate/3
         ]).
 
 -define(SERVER, ?MODULE).
@@ -24,8 +27,17 @@
 %%%============================================================================
 %%% API
 %%%============================================================================
+-spec start_link(binary()) -> {ok, pid()} | {error, any()}.
 start_link(WSS) ->
     websocket_client:start_link(?b2l(WSS), ?MODULE, []).
+
+-spec send(binary()) -> ok.
+send(Payload) ->
+    send(self(), {text, Payload}).
+
+-spec send(pid(), binary()) -> ok.
+send(Pid, Payload) ->
+    websocket_client:cast(Pid, {text, Payload}).
 
 %%%============================================================================
 %%% websocket_client_handler callbacks
@@ -38,20 +50,16 @@ websocket_handle({text, JSON}, _ConnState, State) ->
     case maps:get(<<"type">>, Map) of
         <<"hello">> ->
             {reply, ok, State};
-        Other ->
-            {reply, {error, Other}, State}
+        _Other ->
+            {reply, {ok, Map}, State}
     end;
 websocket_handle(Msg, _ConnState, State) ->
-    error_logger:info_msg("Received msg ~p~n", [Msg]),
-    {reply, unknown, State}.
+    {reply, {error, Msg}, State}.
 
-websocket_info(Info, _ConnState, State) ->
-    error_logger:info_msg("Received info ~p~n", [Info]),
-    {reply, {text, <<"erlang message received">>}, State}.
+websocket_info(_Info, _ConnState, State) ->
+    {reply, {text, <<>>}, State}.
 
-websocket_terminate(Reason, _ConnState, State) ->
-    error_logger:info_msg("Websocket closed in state ~p wih reason ~p~n",
-              [State, Reason]),
+websocket_terminate(_Reason, _ConnState, _State) ->
     ok.
 
 %%%============================================================================

@@ -16,8 +16,8 @@ sr_test_() ->
      fun ()  -> sr:start() end,
      fun (_) -> sr:stop() end,
      [
-      {"Connect without token", {timeout, 60, fun test_invalid_connect/0}},
-      {"Connect with token",    {timeout, 60, fun test_valid_connect/0}}
+        {"Connect without token", {timeout, 60, fun test_invalid_connect/0}}
+      , {"Connect with token",    {timeout, 60, fun test_valid_connect/0}}
      ]
     }.
 
