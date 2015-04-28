@@ -23,10 +23,11 @@ sr_test_() ->
 
 %%%=============================================================================
 test_invalid_connect() ->
-    {Code, Response} = sr:connect(<<>>),
+    {Code, {unable_to_connect, Map}} = sr:connect(<<>>),
     ?assertEqual(error, Code),
-    ?assertEqual({unable_to_connect,
-                  [{<<"ok">>,false},{<<"error">>,<<"not_authed">>}]}, Response).
+    ?assertEqual(false, maps:get(<<"ok">>, Map)),
+    ?assertEqual(<<"not_authed">>, maps:get(<<"error">>, Map)),
+    ok.
 
 test_valid_connect() ->
     {ok, Token} = read_api_token(),

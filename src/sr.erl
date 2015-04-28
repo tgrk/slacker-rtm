@@ -23,17 +23,20 @@
 %%%============================================================================
 -spec connect(binary()) -> {ok, pid()} | {error, any()}.
 connect(Token) ->
-    {ok, _Headers, {Response}} = call_api(<<"rtm.start">>,
-                                          [{token, to_binary(Token)}]),
-    case proplists:get_value(<<"ok">>, Response, <<"false">>) of
+    {ok, _Headers, Response} = call_api(<<"rtm.start">>,
+                                        [{token, to_binary(Token)}]),
+    case maps:get(<<"ok">>, Response, <<"false">>) of
         true  ->
-            WSS   = proplists:get_value(<<"url">>, Response),
-            case sr_sup:start_client(WSS) of
-                Pid when is_pid(Pid) ->
-                    {ok, Pid};
-                Error ->
-                    Error
-            end;
+            %%NOTE: websocket_client is not working in supervisor
+            sr_client:start_link(maps:get(<<"url">>, Response));
+            %% case sr_sup:start_client(maps:get(<<"url">>, Response)) of
+            %%     Pid when is_pid(Pid) ->
+            %%         error_logger:info_msg("pid=~p", [Pid]),
+            %%         {ok, Pid};
+            %%     Error ->
+            %%         error_logger:error_msg("error=~p", [Error]),
+            %%         Error
+            %% end;
         false ->
             {error, {unable_to_connect, Response}}
     end.
@@ -55,7 +58,7 @@ stop() ->
 %%% Internal functionality
 %%%============================================================================
 deps() ->
-    [crypto, ssl, inets, jiffy, websocket_client, ?APP].
+    [websocket_client, jiffy, ?APP].
 
 ensure_started(App) ->
     case application:ensure_all_started(App) of
@@ -82,7 +85,7 @@ parse_response(Headers, Response) ->
         "text/html" ->
             Response;
         "application/json" ->
-            jiffy:decode(to_binary(Response))
+            jiffy:decode(to_binary(Response), [return_maps])
     end.
 
 get_content_type(Headers) ->
