@@ -7,6 +7,7 @@
 
 %% API
 -export([ connect/1
+        , send/2
         , start/0
         , stop/0
         ]).
@@ -29,6 +30,10 @@ connect(Token) ->
         false ->
             {error, {unable_to_connect, Response}}
     end.
+
+-spec send(pid(), binary()) -> ok.
+send(Pid, Payload) ->
+    sr:send(Pid, Payload).
 
 %%%============================================================================
 %%% Application callbacks
