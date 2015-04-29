@@ -11,12 +11,19 @@
 %% API
 -export([ format/4
         , format/5
-        , format/6
+        , format_table/5
         ]).
+
+%% Types
+-type field_title() :: atom() | title | value.
+-type field()       :: {field_title(), binary()}.
+-type fields()      :: [field()].
+-export_type([fields/0]).
 
 %%%============================================================================
 %%% API
 %%%============================================================================
+-spec format(binary(), binary(), binary(), binary()) -> binary().
 format(Title, Message, Color, IconUrl) ->
     to_json({[{<<"fallback">>, ?l2b(Message)},
               {<<"title">>,    ?l2b(Title)},
@@ -25,16 +32,8 @@ format(Title, Message, Color, IconUrl) ->
               {<<"color">>,    Color}
              ]}).
 
-format(Title, Message, Fields, Color, IconUrl) ->
-    to_json({[{<<"fallback">>, ?l2b(Message)},
-              {<<"title">>,    ?l2b(Title)},
-              {<<"text">>,     ?l2b(Message)},
-              format_fields(Fields),
-              {<<"icon_url">>, IconUrl},
-              {<<"color">>,    Color}
-             ]}).
-
-format(Title, Message, [], Color, URL, IconUrl) ->
+-spec format(binary(), binary(), binary(), binary(), binary()) -> binary().
+format(Title, Message, Color, URL, IconUrl) ->
     to_json({[{<<"fallback">>,  ?l2b(Message)},
               {<<"title">>,     ?l2b(Title)},
               {<<"text">>,      ?l2b(Message)},
@@ -44,12 +43,20 @@ format(Title, Message, [], Color, URL, IconUrl) ->
              ]}).
 
 
+-spec format_table(binary(), binary(), fields(), binary(), binary()) -> binary().
+format_table(Title, Message, Fields, Color, IconUrl) ->
+    to_json({[{<<"fallback">>, ?l2b(Message)},
+              {<<"title">>,    ?l2b(Title)},
+              {<<"text">>,     ?l2b(Message)},
+              {<<"fields">>,   lists:map(fun format_field/1, Fields)},
+              {<<"icon_url">>, IconUrl},
+              {<<"color">>,    Color}
+             ]}).
+
+
 %%%============================================================================
 %%% Internal functions
 %%%============================================================================
-format_fields(Fields) ->
-    {<<"fields">>, lists:map(fun format_field/1, Fields)}.
-
 format_field(Field) ->
     {[{<<"title">>, proplists:get_value(title, Field)},
       {<<"value">>, proplists:get_value(value, Field)},
