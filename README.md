@@ -31,13 +31,13 @@ Slack messages are JSON structures that follow specific [formatting][6].
 
 Simple message with bot icon and colored left border:
 ```erlang
-Msg = sr_message:format().
+Msg = sr_message:format(<<"Hello">> <<"Hello World!">>, Fields, <<"#df4f18">>).
 ```
 
 Simple message with table, bot icon and colored left border:
 ```erlang
 Fields = [[{title, "Col"}, {value, 1}]].
-Msg = sr_message:format_table().
+Msg = sr_message:format_table(<<"Hello">> <<"Hello World!">>, Fields, <<"#df4f18">>).
 ```
 
 ## Testing
