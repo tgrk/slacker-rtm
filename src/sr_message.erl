@@ -9,8 +9,10 @@
 -include("sr.hrl").
 
 %% API
--export([ format/4
+-export([ format/3
+        , format/4
         , format/5
+        , format_table/4
         , format_table/5
         ]).
 
@@ -23,6 +25,14 @@
 %%%============================================================================
 %%% API
 %%%============================================================================
+-spec format(binary(), binary(), binary()) -> binary().
+format(Title, Message, Color) ->
+    to_json({[{<<"fallback">>, ?l2b(Message)},
+              {<<"title">>,    ?l2b(Title)},
+              {<<"text">>,     ?l2b(Message)},
+              {<<"color">>,    Color}
+             ]}).
+
 -spec format(binary(), binary(), binary(), binary()) -> binary().
 format(Title, Message, Color, IconUrl) ->
     to_json({[{<<"fallback">>, ?l2b(Message)},
@@ -42,6 +52,14 @@ format(Title, Message, Color, URL, IconUrl) ->
               {<<"color">>,     Color}
              ]}).
 
+-spec format_table(binary(), binary(), fields(), binary()) -> binary().
+format_table(Title, Message, Fields, Color) ->
+    to_json({[{<<"fallback">>, ?l2b(Message)},
+              {<<"title">>,    ?l2b(Title)},
+              {<<"text">>,     ?l2b(Message)},
+              {<<"fields">>,   lists:map(fun format_field/1, Fields)},
+              {<<"color">>,    Color}
+             ]}).
 
 -spec format_table(binary(), binary(), fields(), binary(), binary()) -> binary().
 format_table(Title, Message, Fields, Color, IconUrl) ->
