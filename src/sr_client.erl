@@ -33,7 +33,7 @@ start_link(WSS) ->
 
 -spec send(binary()) -> ok.
 send(Payload) ->
-    send(self(), {text, Payload}).
+    send(self(), Payload).
 
 -spec send(pid(), binary()) -> ok.
 send(Pid, Payload) ->
