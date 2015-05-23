@@ -17,13 +17,13 @@ sr_test_() ->
      fun (_) -> sr:stop() end,
      [
         {"Connect without token", {timeout, 60, fun test_invalid_connect/0}}
-      , {"Connect with token",    {timeout, 60, fun test_valid_connect/0}}
+      , {"Connect with token",    {timeout, 60, fun test_valid_connect/0}},
      ]
     }.
 
 %%%=============================================================================
 test_invalid_connect() ->
-    {Code, {unable_to_connect, Map}} = sr:connect(<<>>),
+    {Code, {unable_to_connect, Map}} = sr:connect(self(), <<>>),
     ?assertEqual(error, Code),
     ?assertEqual(false, maps:get(<<"ok">>, Map)),
     ?assertEqual(<<"not_authed">>, maps:get(<<"error">>, Map)),
@@ -31,7 +31,7 @@ test_invalid_connect() ->
 
 test_valid_connect() ->
     {ok, Token} = read_api_token(),
-    {Code, Pid} = sr:connect(Token),
+    {Code, Pid} = sr:connect(self(), Token),
     ?assertEqual(ok, Code),
     ?assert(is_pid(Pid)).
 

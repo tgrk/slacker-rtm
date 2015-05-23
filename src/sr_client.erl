@@ -1,6 +1,7 @@
 %%%----------------------------------------------------------------------------
 %%% @author Martin Wiso <martin@wiso.cz>
 %%% @doc
+%%% Client wrapping websocket connection to Slack
 %%% @end
 %%%----------------------------------------------------------------------------
 -module(sr_client).
@@ -10,9 +11,8 @@
 -include("sr.hrl").
 
 %% API
--export([ start_link/1
-        , send/1,
-          send/2
+-export([ start_link/2
+        , send/2
         ]).
 
 %% websocket_client_handler callbacks
@@ -24,16 +24,14 @@
 
 -define(SERVER, ?MODULE).
 
+-record(state, {connected :: boolean(), caller_pid :: pid()}).
+
 %%%============================================================================
 %%% API
 %%%============================================================================
--spec start_link(binary()) -> {ok, pid()} | {error, any()}.
-start_link(WSS) ->
-    websocket_client:start_link(?b2l(WSS), ?MODULE, []).
-
--spec send(binary()) -> ok.
-send(Payload) ->
-    send(self(), Payload).
+-spec start_link(pid(), binary()) -> {ok, pid()} | {error, any()}.
+start_link(Caller, WSS) ->
+    websocket_client:start_link(?b2l(WSS), ?MODULE, [Caller]).
 
 -spec send(pid(), binary()) -> ok.
 send(Pid, Payload) ->
@@ -42,21 +40,31 @@ send(Pid, Payload) ->
 %%%============================================================================
 %%% websocket_client_handler callbacks
 %%%============================================================================
-init([], _ConnState) ->
-    {ok, []}.
+init([Caller], _ConnState) ->
+    {ok, #state{connected = false, caller_pid = Caller}}.
 
-websocket_handle({text, JSON}, _ConnState, State) ->
+websocket_handle({text, JSON}, _Conn, #state{caller_pid = Caller} = State) ->
     Map = parse_json(JSON),
     case maps:get(<<"type">>, Map) of
         <<"hello">> ->
-            {reply, ok, State};
-        _Other ->
-            {reply, {ok, Map}, State}
+            error_logger:info_msg("slacker-rtm: connected=~p", [Map]),
+            Caller ! connected,
+            {ok, State#state{connected = true}};
+        Event ->
+            error_logger:info_msg("slacker-rtm: event=~p, payload=~p",
+                                  [Event, Map]),
+            Caller ! {Event, Map},
+            {ok, State}
     end;
+websocket_handle({ping, _Msg}, _ConnState, State) ->
+    error_logger:info_msg("slacker-rtm: ping", []),
+    {reply, {pong, <<>>}, State};
 websocket_handle(Msg, _ConnState, State) ->
-    {reply, {error, Msg}, State}.
+    error_logger:info_msg("slacker-rtm: handle=~p", [Msg]),
+    {ok, State}.
 
-websocket_info(_Info, _ConnState, State) ->
+websocket_info(Info, _ConnState, State) ->
+    error_logger:info_msg("slacker-rtm: info=~p", [Info]),
     {reply, {text, <<>>}, State}.
 
 websocket_terminate(_Reason, _ConnState, _State) ->

@@ -1,13 +1,14 @@
 %%%----------------------------------------------------------------------------
 %%% @author Martin Wiso <martin@wiso.cz>
 %%% @doc
+%%% Slacker API
 %%% @end
 %%%----------------------------------------------------------------------------
 -module(sr).
 
 %% API
--export([ connect/1
-        , send/2
+-export([ connect/2
+        , send/1
         , start/0
         , stop/0
         ]).
@@ -19,21 +20,21 @@
 %%%============================================================================
 %%% API
 %%%============================================================================
--spec connect(binary()) -> {ok, pid()} | {error, any()}.
-connect(Token) ->
+-spec connect(pid(), binary()) -> {ok, pid()} | {error, any()}.
+connect(Caller, Token) ->
     {ok, _Headers, Response} = call_api(<<"rtm.start">>,
                                         [{token, to_binary(Token)}]),
     case maps:get(<<"ok">>, Response, <<"false">>) of
         true  ->
             %%NOTE: websocket_client is not working in supervisor
-            sr_client:start_link(maps:get(<<"url">>, Response));
+            sr_client:start_link(Caller, maps:get(<<"url">>, Response));
         false ->
             {error, {unable_to_connect, Response}}
     end.
 
--spec send(pid(), binary()) -> ok.
-send(Pid, Payload) ->
-    sr:send(Pid, Payload).
+-spec send(binary()) -> ok.
+send(Payload) ->
+    sr:send(Payload).
 
 %%%============================================================================
 %%% Application callbacks
