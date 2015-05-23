@@ -1,6 +1,11 @@
 # slacker-rtm
 Erlang [Real Time Messaging API client][2] for [Slack][1].
 
+## Dependencies
+
+* Erlang (>= R17) - because `maps`
+* [rebar][8]
+
 ## Fetch dependencies and compile
 
 ```
@@ -56,3 +61,4 @@ $ rebar co eunit skip_deps=true
 [5]: https://api.slack.com/tokens
 [6]: https://api.slack.com/docs/formatting
 [7]: https://api.slack.com/methods/rtm.start
+[8]: https://github.com/rebar/rebar
