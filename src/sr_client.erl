@@ -35,6 +35,7 @@ start_link(Caller, WSS) ->
 
 -spec send(pid(), binary()) -> ok.
 send(Pid, Payload) ->
+    error_logger:info_msg("slacker-rtm: send=~p", [Payload]),
     websocket_client:cast(Pid, {text, Payload}).
 
 %%%============================================================================
@@ -43,7 +44,7 @@ send(Pid, Payload) ->
 init([Caller], _ConnState) ->
     {ok, #state{connected = false, caller_pid = Caller}}.
 
-websocket_handle({text, JSON}, _Conn, #state{caller_pid = Caller} = State) ->
+websocket_handle({text, JSON}, _ConnState, #state{caller_pid = Caller} = State) ->
     Map = parse_json(JSON),
     case maps:get(<<"type">>, Map) of
         <<"hello">> ->

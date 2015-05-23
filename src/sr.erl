@@ -8,7 +8,7 @@
 
 %% API
 -export([ connect/2
-        , send/1
+        , send/2
         , start/0
         , stop/0
         ]).
@@ -27,14 +27,21 @@ connect(Caller, Token) ->
     case maps:get(<<"ok">>, Response, <<"false">>) of
         true  ->
             %%NOTE: websocket_client is not working in supervisor
-            sr_client:start_link(Caller, maps:get(<<"url">>, Response));
+            case sr_client:start_link(Caller, maps:get(<<"url">>, Response)) of
+                {ok, Pid} ->
+                    %% send metadata back to caller
+                    Caller ! {set_metadata, Response},
+                    {ok, Pid};
+                Error ->
+                    Error
+            end;
         false ->
             {error, {unable_to_connect, Response}}
     end.
 
--spec send(binary()) -> ok.
-send(Payload) ->
-    sr:send(Payload).
+-spec send(pid(), binary()) -> ok.
+send(Pid, Payload) ->
+    sr_client:send(Pid, Payload).
 
 %%%============================================================================
 %%% Application callbacks
