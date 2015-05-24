@@ -9,6 +9,7 @@
 %% API
 -export([ connect/2
         , send/2
+        , format_message/3
         , start/0
         , stop/0
         ]).
@@ -43,10 +44,17 @@ connect(Caller, Token) ->
 send(Pid, Payload) ->
     sr_client:send(Pid, Payload).
 
+-spec format_message(pos_integer(), binary(), binary()) -> binary().
+format_message(Id, Channel, Text) ->
+    jiffy:encode(#{<<"id">>      => Id,
+                   <<"type">>    => <<"message">>,
+                   <<"channel">> => Channel,
+                   <<"text">>    => Text}).
+
 %%%============================================================================
 %%% Application callbacks
 %%%============================================================================
--spec start() -> {ok, pid()} | {ok, pid(), term()} | {error, any()}.
+-spec start() -> ok | no_return().
 start() ->
     [ensure_started(D) || D <- deps()],
     ok.

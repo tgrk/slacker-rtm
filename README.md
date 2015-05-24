@@ -30,20 +30,16 @@ Connect to API using obtained [token][5]:
 {ok, Pid} = sr:connect(BinToken).
 ```
 
-## Message formatting
+## Sending messages
 
-Slack messages are JSON structures that follow specific [formatting][6].
+Slack RTM API supports only plain text messages. Rich formatted messages (aka attachmets) using JSON structures that follow specific [formatting][6] are not supported. Please refer to [Sending messages][2] section of oficial Slack RTM API documentation.
 
-Simple message with bot icon and colored left border:
+Simple message can be created using following helper:
 ```erlang
-Msg = sr_message:format(<<"Hello">> <<"Hello World!">>, Fields, <<"#df4f18">>).
+JsonMsg = sr:format_message(1, <<"foo">>, <<"Hello world!">>).
+ok = sr:send(Pid, JsonMsg).
 ```
 
-Simple message with table, bot icon and colored left border:
-```erlang
-Fields = [[{title, "Col"}, {value, 1}]].
-Msg = sr_message:format_table(<<"Hello">> <<"Hello World!">>, Fields, <<"#df4f18">>).
-```
 
 ## Testing
 You have to setup API token file in order to use tests. Please add your
