@@ -32,7 +32,7 @@ Connect to API using obtained [token][5]:
 
 ## Sending messages
 
-Slack RTM API supports only plain text messages. Rich formatted messages (aka attachmets) using JSON structures that follow specific [formatting][6] are not supported. Please refer to [Sending messages][2] section of oficial Slack RTM API documentation.
+Slack RTM API supports only plain text messages. Rich formatted messages (aka attachmets) using JSON structures that follow specific [formatting][6] are not supported. Please refer to [Sending messages][2] section of oficial Slack RTM API documentation. For sending rich formatted messages (aka attachments) you have to use [slacker][9] - Slack Web API client.
 
 Simple message can be created using following helper:
 ```erlang
@@ -58,3 +58,4 @@ $ rebar co eunit skip_deps=true
 [6]: https://api.slack.com/docs/formatting
 [7]: https://api.slack.com/methods/rtm.start
 [8]: https://github.com/rebar/rebar
+[9]: https://github.com/julienXX/slacker
