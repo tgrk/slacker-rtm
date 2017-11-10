@@ -39,5 +39,6 @@ test_valid_connect() ->
 %%% Internal functionality
 %%%============================================================================
 read_api_token() ->
-    {ok, [PL]} = file:consult("../test/api_token.term"),
+    {ok, Path} = file:get_cwd(),
+    {ok, [PL]} = file:consult(Path ++ "/test/api_token.term"),
     {ok, proplists:get_value(token, PL)}.
